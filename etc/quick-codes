@@ -1,0 +1,60 @@
+Link to site:
+https://cozyr.github.io/storyboard/
+
+=== Text Styling
+
+Line Break:
+<hr class="scene-break" />
+
+Line Break (for centered texts/articles):
+<br />
+<p class="center">
+
+Small Text:
+<small></small>
+
+Scene Image:
+<img class="scene-img" src="../../../assets/images/series/percy-jackson-and-the-olympians/book-1-scenes/1-1.png" alt="Scene image" />
+
+Scene Image (Standalone):
+<img class="scene-img" src="../../assets/images/standalone/percy-jackson-and-the-singer-of-apollo/book-scenes/1-1.png" alt="Scene image" />
+
+=====
+
+Replace:
+<span class="italic"> to <span class="italic"><i>
+</span> to </span></i>
+
+
+
+TO CHECK AT THE END =====================================
+
+blockquote to p
+
+Fix dots format (check in this order):
+ … change to … (no space before) 🔥 <-- Do only this
+… (space after) to … (no space after) 
+…(letter a-z/number) to … (a space after letter/number) 🔥 <-- Check each letter if caps or not
+…(punctuations .,!?) to … (no space after)
+(punctuations)… to … (no punctuations)
+“… change to “… (no space after)
+… ” change to …” (no space between … and ”)
+
+<span class="italic"> to nothing
+</span> to nothing
+' to ’
+off(a-z) to off (a-z)
+
+Fix dashes (remove spaces):
+— to (just remove space in between)
+
+Delete:
+class="calibre1" (or other numbers?)
+
+Remove:
+<p class="center">* * *</p>
+
+======
+
+Have chatgpt help with detecting spell errors, words/phrases that needed to be italcized, words that are all caps to put <small> tags (no codes, just plain text)
+

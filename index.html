@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="googlebot" content="noindex, nofollow" />
+    <title>Story Board</title>
+
+    <!-- Prevent flash before partials + JS are ready -->
+    <script>
+        document.documentElement.classList.add("is-loading");
+    </script>
+
+    <link rel="stylesheet" href="css/style.css" />
+    <script defer src="js/main.js"></script>
+</head>
+
+<body class="is-home">
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <!-- Injected partial: header.html -->
+    <div id="site-header" aria-hidden="true"></div>
+
+    <main id="main" class="page page-home" aria-label="Home">
+        <section class="hero">
+            <div class="hero-stack" aria-hidden="true">
+                <!-- Percy (background) -->
+                <img class="hero-percy hero-percy--float" src="assets/images/site/characters/percy-jackson.png" alt="" loading="eager" />
+            </div>
+
+            <!-- Story Board logo (front) -->
+            <img class="title-logo title-logo--small" src="assets/images/site/storyboard-logo.png" alt="Story Board" loading="eager" />
+        </section>
+
+        <!-- Injected partial: ocean-waves.html -->
+        <div id="site-waves" aria-hidden="true"></div>
+    </main>
+
+    <!-- Injected partial: to-top.html (if you want it on the homepage too) -->
+    <div id="site-to-top" aria-hidden="true"></div>
+
+    <!-- Injected partial: footer.html -->
+    <div id="site-footer"></div>
+</body>
+
+</html>
