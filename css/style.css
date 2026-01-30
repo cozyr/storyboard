@@ -1772,6 +1772,20 @@ html.js-scene-reveal .page-book .scene-img.no-anim {
         max-width: none;
     }
 
+    .book-list--grid {
+        gap: 12px;
+        /* match the calculation below */
+    }
+
+    .book-list--grid>a.book-item {
+        flex: 0 0 calc((100% - 14px) / 2);
+        max-width: none;
+        width: auto;
+        /* cancels any width:100% overrides */
+        min-width: 0;
+        /* prevents overflow forcing single column */
+    }
+
     .library-group {
         padding-top: 28px;
         margin-top: 12px;
