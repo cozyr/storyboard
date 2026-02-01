@@ -7,6 +7,12 @@
    ✅ To-top button works on ALL pages:
       - appears only if page is scrollable
       - appears only when user is near the bottom
+
+   ✅ NEW (Prologue/Epilogues support)
+      - Prologue appears as ✦ (hash: #prologue)
+      - Epilogues appear as ✧1 ✧2 (hash: #ep-1, #ep-2)
+      - Prev/Next traverses across special entries
+      - The End appears on the final entry (last epilogue if present)
 ========================================================= */
 
 /* =========================
@@ -444,40 +450,137 @@
       return all.length ? Math.max(...all) : 0;
     };
 
-    const TOTAL_CHAPTERS = getLastChapterNumber();
-
     const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
 
     const getWindowSize = () => (window.innerWidth <= 720 ? 5 : 9);
-    const useSlider = () => TOTAL_CHAPTERS > getWindowSize();
 
-    let activeChapter = null;
-    let windowStart = 1;
+    /* =========================
+       NEW: Build ordered "entries"
+       - prologue (optional)
+       - chapters 1..N
+       - epilogues 1..M
+    ========================= */
+    const detectCountsFromTemplates = () => {
+      const hasPrologueTpl = templates.has("prologue");
+      const epNums = Array.from(templates.keys())
+        .map((k) => {
+          const m = String(k).match(/^ep-(\d+)$/i);
+          return m ? Number(m[1]) : null;
+        })
+        .filter((n) => Number.isFinite(n) && n > 0);
+
+      const maxEp = epNums.length ? Math.max(...epNums) : 0;
+      return { hasPrologueTpl, maxEp };
+    };
+
+    const { hasPrologueTpl, maxEp } = detectCountsFromTemplates();
+    const chapterCountDetected = getLastChapterNumber();
+
+    // Optional explicit config per page:
+    const chaptersFromData = Number(page.dataset.chapters || page.dataset.chapterCount || "");
+    const prologueFromData = Number(page.dataset.prologue || page.dataset.prologues || "");
+    const epiloguesFromData = Number(page.dataset.epilogues || "");
+
+    const CHAPTER_COUNT = Number.isFinite(chaptersFromData) && chaptersFromData > 0
+      ? chaptersFromData
+      : chapterCountDetected;
+
+    // Heuristic to satisfy your current book immediately:
+    // If the book has 49 chapters and nothing else is specified, assume 1 prologue + 2 epilogues.
+    const heuristicUseSpecials =
+      CHAPTER_COUNT === 49 &&
+      !Number.isFinite(prologueFromData) &&
+      !Number.isFinite(epiloguesFromData) &&
+      !hasPrologueTpl &&
+      maxEp === 0;
+
+    const PROLOGUE_COUNT = Number.isFinite(prologueFromData)
+      ? Math.max(0, prologueFromData)
+      : (hasPrologueTpl ? 1 : (heuristicUseSpecials ? 1 : 0));
+
+    const EPILOGUE_COUNT = Number.isFinite(epiloguesFromData)
+      ? Math.max(0, epiloguesFromData)
+      : (maxEp > 0 ? maxEp : (heuristicUseSpecials ? 2 : 0));
+
+    const buildEntries = () => {
+      const out = [];
+
+      if (PROLOGUE_COUNT > 0) {
+        out.push({
+          key: "prologue",
+          kind: "prologue",
+          label: "✦",
+          aria: "Prologue",
+          hash: "#prologue",
+        });
+      }
+
+      for (let i = 1; i <= CHAPTER_COUNT; i++) {
+        out.push({
+          key: String(i),
+          kind: "chapter",
+          label: String(i),
+          aria: `Chapter ${i}`,
+          hash: `#ch-${i}`,
+        });
+      }
+
+      for (let i = 1; i <= EPILOGUE_COUNT; i++) {
+        out.push({
+          key: `ep-${i}`,
+          kind: "epilogue",
+          label: `✧${i}`,
+          aria: `Epilogue ${i}`,
+          hash: `#ep-${i}`,
+        });
+      }
+
+      return out;
+    };
+
+    const ENTRIES = buildEntries();
+    const TOTAL_ENTRIES = ENTRIES.length;
+
+    const getEntryIndexByKey = (key) =>
+      ENTRIES.findIndex((e) => e.key === String(key));
+
+    const getEntryByKey = (key) => ENTRIES[getEntryIndexByKey(key)] || null;
+
+    const useSlider = () => TOTAL_ENTRIES > getWindowSize();
+
+    let activeKey = null;        // string key: "prologue" | "1".."49" | "ep-1"..
+    let windowStartIndex = 0;    // index into ENTRIES
 
     const setChapterStripsVisible = (visible) => {
       if (topNav) topNav.hidden = !visible;
       if (bottomNav) bottomNav.hidden = !visible;
     };
 
-    const computeWindowStartForChapter = (ch) => {
+    const computeWindowStartForIndex = (idx) => {
       const size = getWindowSize();
       const centerSlot = Math.ceil(size / 2);
 
-      const idealStart = ch - (centerSlot - 1);
-      const maxStart = Math.max(1, TOTAL_CHAPTERS - size + 1);
+      const idealStart = idx - (centerSlot - 1);
+      const maxStart = Math.max(0, TOTAL_ENTRIES - size);
 
-      return clamp(idealStart, 1, maxStart);
+      return clamp(idealStart, 0, maxStart);
     };
 
-    const makeNumberChip = (chapter) => {
+    const makeEntryChip = (entry) => {
       const li = document.createElement("li");
       const a = document.createElement("a");
 
       a.className = "chapter-chip";
-      a.dataset.chapter = String(chapter);
-      a.href = `#ch-${chapter}`;
-      a.textContent = String(chapter);
-      a.setAttribute("aria-label", `Chapter ${chapter}`);
+      a.dataset.chapter = entry.key; // keeps selector compatibility
+      a.href = entry.hash;
+      a.textContent = entry.label;
+
+      // NEW: mark kind for CSS styling
+      if (entry.kind === "prologue") a.dataset.kind = "prologue";
+      if (entry.kind === "epilogue") a.dataset.kind = "epilogue";
+
+      a.setAttribute("aria-label", entry.aria);
+      a.title = entry.aria;
 
       li.appendChild(a);
       return li;
@@ -487,10 +590,10 @@
       if (!navEl) return;
 
       const size = getWindowSize();
-      const maxStart = Math.max(1, TOTAL_CHAPTERS - size + 1);
+      const maxStart = Math.max(0, TOTAL_ENTRIES - size);
 
-      const start = clamp(windowStart, 1, maxStart);
-      const end = Math.min(TOTAL_CHAPTERS, start + size - 1);
+      const start = clamp(windowStartIndex, 0, maxStart);
+      const end = Math.min(TOTAL_ENTRIES - 1, start + size - 1);
 
       navEl.innerHTML = "";
 
@@ -504,20 +607,20 @@
         ol.classList.add("is-slider");
       }
 
+      const activeIdx = activeKey != null ? getEntryIndexByKey(activeKey) : -1;
+
       const leftDisabled =
-        Number.isFinite(activeChapter) ? activeChapter <= 1 : start <= 1;
+        activeIdx >= 0 ? activeIdx <= 0 : start <= 0;
 
       const rightDisabled =
-        Number.isFinite(activeChapter)
-          ? activeChapter >= TOTAL_CHAPTERS
-          : end >= TOTAL_CHAPTERS;
+        activeIdx >= 0 ? activeIdx >= TOTAL_ENTRIES - 1 : end >= TOTAL_ENTRIES - 1;
 
       const prev = document.createElement("a");
       prev.className = "chapter-chip";
       prev.dataset.action = "prev";
       prev.href = "#";
       prev.textContent = "<";
-      prev.setAttribute("aria-label", "Previous chapter");
+      prev.setAttribute("aria-label", "Previous");
       if (leftDisabled) {
         prev.classList.add("is-disabled");
         prev.setAttribute("aria-disabled", "true");
@@ -529,7 +632,7 @@
       next.dataset.action = "next";
       next.href = "#";
       next.textContent = ">";
-      next.setAttribute("aria-label", "Next chapter");
+      next.setAttribute("aria-label", "Next");
       if (rightDisabled) {
         next.classList.add("is-disabled");
         next.setAttribute("aria-disabled", "true");
@@ -537,7 +640,7 @@
       }
 
       for (let i = start; i <= end; i++) {
-        ol.appendChild(makeNumberChip(i));
+        ol.appendChild(makeEntryChip(ENTRIES[i]));
       }
 
       row.appendChild(prev);
@@ -548,7 +651,7 @@
 
     const syncStrips = () => {
       if (!useSlider()) {
-        if (TOTAL_CHAPTERS <= 1) setChapterStripsVisible(false);
+        if (TOTAL_ENTRIES <= 1) setChapterStripsVisible(false);
         return;
       }
 
@@ -557,9 +660,7 @@
 
       const chips = Array.from(page.querySelectorAll(".chapter-chip[data-chapter]"));
       chips.forEach((a) => {
-        const isActive =
-          activeChapter != null && a.dataset.chapter === String(activeChapter);
-
+        const isActive = activeKey != null && a.dataset.chapter === String(activeKey);
         a.classList.toggle("is-active", isActive);
 
         if (isActive) a.setAttribute("aria-current", "true");
@@ -567,15 +668,20 @@
       });
     };
 
-    const upsertTheEnd = (ch) => {
+    const upsertTheEnd = (key) => {
       mount.querySelectorAll(".the-end-wrap").forEach((el) => el.remove());
 
-      const last = getLastChapterNumber();
-      if (!last || Number(ch) !== Number(last)) return;
+      const idx = getEntryIndexByKey(key);
+      if (idx < 0) return;
+      if (idx !== TOTAL_ENTRIES - 1) return; // only on last entry
 
       const chapterEl =
-        mount.querySelector(`[data-chapter="${String(ch)}"]`) ||
-        mount.querySelector(`#ch-${String(ch)}`);
+        mount.querySelector(`[data-chapter="${String(key)}"]`) ||
+        mount.querySelector(`#${String(key)}`) ||
+        mount.querySelector(`#ch-${String(key)}`) ||
+        mount.querySelector(`#prologue`) ||
+        mount.querySelector(`#ep-1`) ||
+        mount.querySelector(`#ep-2`);
 
       const target = chapterEl?.querySelector(".chapter-text") || mount;
 
@@ -586,8 +692,8 @@
     };
 
     const resetSliderWindow = () => {
-      windowStart = 1;
-      activeChapter = null;
+      windowStartIndex = 0;
+      activeKey = null;
       if (useSlider()) syncStrips();
     };
 
@@ -596,11 +702,11 @@
       cleanupSceneReveal = () => { };
 
       mount.innerHTML = "";
-      activeChapter = null;
+      activeKey = null;
 
       reader.hidden = true;
 
-      if (TOTAL_CHAPTERS === 1) setChapterStripsVisible(true);
+      if (TOTAL_ENTRIES === 1) setChapterStripsVisible(true);
       if (bottomNav) bottomNav.hidden = true;
 
       hint.hidden = false;
@@ -610,47 +716,58 @@
       requestToTopVisibilityUpdate();
     };
 
-    const renderPlaceholder = (ch) => {
+    const renderPlaceholder = (entry) => {
       const section = document.createElement("section");
       section.className = "chapter";
-      section.id = `ch-${ch}`;
-      section.dataset.chapter = String(ch);
+      section.id = entry.hash.replace("#", "");
+      section.dataset.chapter = String(entry.key);
+
+      const headNum = entry.kind === "chapter" ? entry.label : entry.label;
+      const headTitle =
+        entry.kind === "prologue"
+          ? "Prologue"
+          : entry.kind === "epilogue"
+            ? entry.aria
+            : `Chapter ${entry.label}`;
 
       section.innerHTML = `
         <header class="chapter-head">
-          <div class="chapter-num">${ch}</div>
-          <h2 class="chapter-title">Chapter ${ch}</h2>
+          <div class="chapter-num">${headNum}</div>
+          <h2 class="chapter-title">${headTitle}</h2>
         </header>
         <div class="chapter-text">
           <hr class="scene-break" />
-          <p><em>This chapter hasn’t been added yet.</em></p>
+          <p><em>This section hasn’t been added yet.</em></p>
           <hr class="scene-break" />
         </div>
       `;
       return section;
     };
 
-    const renderChapter = (ch) => {
-      const key = String(ch);
-      const tpl = templates.get(key);
+    const renderEntry = (key) => {
+      const entry = getEntryByKey(key);
+      if (!entry) return;
+
+      const tpl = templates.get(String(entry.key));
 
       mount.innerHTML = "";
-      mount.appendChild(tpl ? tpl.content.cloneNode(true) : renderPlaceholder(ch));
-      upsertTheEnd(ch);
+      mount.appendChild(tpl ? tpl.content.cloneNode(true) : renderPlaceholder(entry));
+      upsertTheEnd(entry.key);
 
       cleanupSceneReveal();
       cleanupSceneReveal = initSceneImageRevealForMount(mount);
 
-      activeChapter = ch;
+      activeKey = entry.key;
 
       if (useSlider()) {
-        windowStart = computeWindowStartForChapter(ch);
+        const idx = getEntryIndexByKey(entry.key);
+        windowStartIndex = computeWindowStartForIndex(idx);
         syncStrips();
       }
 
       reader.hidden = false;
 
-      if (TOTAL_CHAPTERS === 1) {
+      if (TOTAL_ENTRIES === 1) {
         setChapterStripsVisible(false);
       } else if (bottomNav) {
         bottomNav.hidden = false;
@@ -659,8 +776,7 @@
       hint.hidden = true;
       if (synopsis) synopsis.hidden = true;
 
-      const wantedHash = `#ch-${ch}`;
-      if (location.hash !== wantedHash) history.replaceState(null, "", wantedHash);
+      if (location.hash !== entry.hash) history.replaceState(null, "", entry.hash);
 
       scrollTop({ instant: true });
       requestToTopVisibilityUpdate();
@@ -677,9 +793,24 @@
       });
     }
 
-    const parseChapterFromHash = () => {
-      const m = location.hash.match(/ch-(\d+)/i);
-      return m && m[1] ? Number(m[1]) : null;
+    const parseKeyFromHash = () => {
+      const h = (location.hash || "").trim();
+
+      if (!h || h === "#") return null;
+
+      if (/^#prologue$/i.test(h)) return "prologue";
+
+      const mCh = h.match(/^#ch-(\d+)$/i);
+      if (mCh && mCh[1]) return String(Number(mCh[1]));
+
+      const mEp = h.match(/^#ep-(\d+)$/i);
+      if (mEp && mEp[1]) return `ep-${Number(mEp[1])}`;
+
+      // Backward compat: old hashes that might include digits
+      const legacy = h.match(/ch-(\d+)/i);
+      if (legacy && legacy[1]) return String(Number(legacy[1]));
+
+      return null;
     };
 
     const handleNavClick = (e) => {
@@ -696,45 +827,49 @@
       if (action === "prev" || action === "next") {
         e.preventDefault();
 
-        if (Number.isFinite(activeChapter)) {
-          const nextCh =
-            action === "prev"
-              ? Math.max(1, activeChapter - 1)
-              : Math.min(TOTAL_CHAPTERS, activeChapter + 1);
+        const activeIdx = activeKey != null ? getEntryIndexByKey(activeKey) : -1;
 
-          if (nextCh !== activeChapter) renderChapter(nextCh);
+        // If something is selected, move selection.
+        if (activeIdx >= 0) {
+          const nextIdx =
+            action === "prev"
+              ? Math.max(0, activeIdx - 1)
+              : Math.min(TOTAL_ENTRIES - 1, activeIdx + 1);
+
+          const nextEntry = ENTRIES[nextIdx];
+          if (nextEntry && nextEntry.key !== activeKey) renderEntry(nextEntry.key);
           return;
         }
 
+        // If nothing selected yet, move window.
         const size = getWindowSize();
-        const maxStart = Math.max(1, TOTAL_CHAPTERS - size + 1);
+        const maxStart = Math.max(0, TOTAL_ENTRIES - size);
 
-        windowStart =
+        windowStartIndex =
           action === "prev"
-            ? clamp(windowStart - size, 1, maxStart)
-            : clamp(windowStart + size, 1, maxStart);
+            ? clamp(windowStartIndex - size, 0, maxStart)
+            : clamp(windowStartIndex + size, 0, maxStart);
 
         syncStrips();
         return;
       }
 
-      const chStr = chip.dataset.chapter;
-      if (!chStr) return;
+      const key = chip.dataset.chapter;
+      if (!key) return;
 
       e.preventDefault();
-      const ch = Number(chStr);
-      if (!Number.isFinite(ch) || ch <= 0) return;
+      if (getEntryIndexByKey(key) < 0) return;
 
-      renderChapter(ch);
+      renderEntry(key);
     };
 
     topNav?.addEventListener("click", handleNavClick);
     bottomNav?.addEventListener("click", handleNavClick);
 
     window.addEventListener("hashchange", () => {
-      const ch = parseChapterFromHash();
-      if (ch == null) clearChapter();
-      else renderChapter(ch);
+      const key = parseKeyFromHash();
+      if (key == null) clearChapter();
+      else renderEntry(key);
     });
 
     window.addEventListener("resize", () => {
@@ -747,9 +882,9 @@
       syncStrips();
     }
 
-    const initial = parseChapterFromHash();
-    if (initial == null) clearChapter();
-    else renderChapter(initial);
+    const initialKey = parseKeyFromHash();
+    if (initialKey == null) clearChapter();
+    else renderEntry(initialKey);
   }
 
   /* ---------- Random Covers ---------- */

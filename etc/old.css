@@ -1,8 +1,8 @@
 /* =========================================================
-   Cozy Reading Library — style.css (cleaned + organized)
-   - Same design, less repetition
-   - No visual/behavior changes (except: grid rows now center)
-   ✅ UPDATE: chapter arrow keys + disabled style (ONLY)
+   Story Board — style.css (cleaned + organized)
+   - Same exact design
+   - Less repetition / safer scoping
+   - Timeline rename support
 ========================================================= */
 
 /* =========================
@@ -28,12 +28,10 @@
     --book-content-width: 1040px;
 
     --waves-h: 140px;
-    /* matches .ocean-waves height */
 
     --font-ui: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans",
         "Helvetica Neue", sans-serif;
 
-    /* EB Garamond first, Georgia fallback */
     --font-serif: "EBGaramondLocal", Georgia, "Times New Roman", Times, serif;
 
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
@@ -492,7 +490,6 @@ img {
 /* Book page: reduce extra space before footer/to-top */
 .page.page-book {
     padding-bottom: 40px;
-    /* try 24px–60px */
 }
 
 .page-home {
@@ -503,6 +500,10 @@ img {
 
 body.is-home .page {
     padding-bottom: 0;
+}
+
+.page-header {
+    text-align: center;
 }
 
 .page-header h1 {
@@ -523,21 +524,6 @@ body.is-home .page {
     margin-top: -2px;
     font-size: 0.95em;
     opacity: 0.82;
-}
-
-/* Center title + synopsis in the page header (Percy page) */
-.page-header {
-    text-align: center;
-}
-
-.page-header h1 {
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.page-header .series-author {
-    margin-left: auto;
-    margin-right: auto;
 }
 
 /* =========================
@@ -568,7 +554,7 @@ body.is-home .page {
 }
 
 /* =========================
-   Books / Library List
+   Books / Library List (base)
 ========================= */
 .book-list {
     display: grid;
@@ -593,79 +579,6 @@ body.is-home .page {
         border-color 140ms ease,
         background 140ms ease,
         box-shadow 140ms ease;
-}
-
-/* =========================================================
-   Grid layout (Library + Series pages)
-   - Desktop: behaves like 3 per row
-   - Mobile: behaves like 2 per row
-   - ✅ Last row is always centered (fixes “glued left”)
-========================================================= */
-.book-list--grid {
-    /* override .book-list grid */
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-
-    /* keep same spacing vibe */
-    gap: 14px;
-}
-
-/* Size each card like a 3-column layout */
-.book-list--grid>.book-item {
-    flex: 0 1 calc((100% - 28px) / 3);
-    /* 2 gaps of 14px = 28px */
-    max-width: 360px;
-    /* prevents huge cards on ultra-wide screens */
-}
-
-/* Your existing “grid card look” */
-.book-list--grid .book-item {
-    display: block;
-    padding: 6px;
-    background: transparent;
-    border: 1px solid rgba(233, 242, 255, 0.10);
-    box-shadow: none;
-    border-radius: var(--radius2);
-}
-
-.book-list--grid a.book-item:hover {
-    transform: translateY(-2px);
-    border-color: rgba(30, 227, 207, 0.30);
-    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
-    background: transparent;
-}
-
-.book-list--grid .book-cover {
-    width: 100%;
-    aspect-ratio: 2 / 3;
-    border-radius: var(--radius2);
-    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.55);
-}
-
-.book-list--grid .book-info {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-}
-
-.book-list--grid .book-title {
-    margin: 10px 0 2px;
-    text-align: center;
-    line-height: 1.25;
-    font-size: 15px;
-    /* matches your mobile look */
-}
-
-.book-list--grid .book-summary {
-    display: none;
-}
-
-.book-list--grid .book-meta {
-    display: inline-block;
-    margin: 10px auto 0;
-    box-shadow: 0 0 0 6px rgba(30, 227, 207, 0.05);
 }
 
 a.book-item:hover {
@@ -728,6 +641,7 @@ a.book-item:hover {
     background: rgba(30, 227, 207, 0.08);
 }
 
+/* Disabled book card (still same look) */
 .book-item--disabled {
     opacity: 0.62;
     filter: saturate(0.85);
@@ -736,6 +650,73 @@ a.book-item:hover {
 
 .book-item--disabled .book-cover {
     box-shadow: 0 14px 36px rgba(0, 0, 0, 0.45);
+}
+
+/* =========================
+   Grid layout (Library + Series pages)
+   - Desktop: behaves like 3 per row
+   - Mobile: behaves like 2 per row
+   - Last row always centered
+========================= */
+.book-list--grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 16px;
+}
+
+.book-list--grid>.book-item {
+    flex: 0 1 calc((100% - 28px) / 3);
+    max-width: 360px;
+}
+
+/* Grid-card styling (covers only) */
+.book-list--grid .book-item {
+    display: block;
+    padding: 6px;
+    background: transparent;
+    border: 1px solid rgba(233, 242, 255, 0.10);
+    box-shadow: none;
+    border-radius: var(--radius2);
+}
+
+.book-list--grid a.book-item:hover {
+    transform: translateY(-2px);
+    border-color: rgba(30, 227, 207, 0.30);
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
+    background: transparent;
+}
+
+.book-list--grid .book-cover {
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    border-radius: var(--radius2);
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.55);
+}
+
+.book-list--grid .book-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.book-list--grid .book-title {
+    margin: 10px 0 2px;
+    text-align: center;
+    line-height: 1.25;
+    font-size: 15px;
+}
+
+.book-list--grid .book-summary {
+    display: none;
+}
+
+.book-list--grid .book-meta {
+    display: inline-block;
+    margin: 10px auto 0;
+    box-shadow: 0 0 0 6px rgba(30, 227, 207, 0.05);
 }
 
 /* =========================
@@ -780,6 +761,7 @@ a.book-item:hover {
     letter-spacing: 0.015em;
 }
 
+/* Chapter strip container */
 .page-book .chapter-strip {
     position: static;
     width: 100%;
@@ -804,18 +786,13 @@ a.book-item:hover {
 
 /* =========================
    Chapter Strip Layout
-   - Arrows stay OUTSIDE the scroll area
-   - Numbers scroll on mobile if needed
 ========================= */
-
-/* Wrapper row for: [<] [numbers...] [>] */
 .chapter-strip-row {
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
-/* Numbers container */
 .chapter-strip-list {
     list-style: none;
     margin: 0;
@@ -826,45 +803,32 @@ a.book-item:hover {
     justify-content: center;
 
     flex: 1;
-    /* takes up the middle space */
     min-width: 0;
-    /* ✅ allows scrolling to work properly */
 }
 
-/* Keep clean (no extra spacing needed) */
 .chapter-strip-list>li {
     margin: 0;
 }
 
-/* ✅ Mobile: numbers become scrollable, arrows stay fixed */
+/* Mobile: numbers become scrollable if needed */
 @media (max-width: 720px) {
-
-    /* ✅ keep arrows and list nicely aligned */
     .chapter-strip-row {
         align-items: center;
     }
 
-    /* ✅ Mobile: numbers still scroll if needed,
-        BUT stay centered when they fit */
     .chapter-strip-list.is-slider {
         justify-content: center;
-        /* ✅ fixes "glued left" */
         flex-wrap: nowrap;
 
         overflow-x: auto;
         overflow-y: visible;
         -webkit-overflow-scrolling: touch;
 
-        /* ✅ IMPORTANT: prevents glow being clipped at the top */
         padding: 10px 6px;
-        /* top/bottom space for glow */
         margin: -10px 0;
-        /* cancels extra height visually */
 
         scrollbar-width: none;
-        /* Firefox */
         -ms-overflow-style: none;
-        /* old Edge */
     }
 
     .chapter-strip-list.is-slider::-webkit-scrollbar {
@@ -876,6 +840,7 @@ a.book-item:hover {
     }
 }
 
+/* Chapter hint */
 .page-book .chapter-hint {
     width: 100%;
     max-width: var(--book-content-width);
@@ -890,12 +855,11 @@ a.book-item:hover {
     animation: chapterHintPulse 0.8s ease-in-out infinite;
 }
 
-/* Book page synopsis under the chapter hint */
+/* Synopsis under hint */
 .page-book .book-synopsis {
     width: 100%;
     max-width: var(--book-content-width);
     margin: 12px auto 18px;
-    /* little margin-top + comfortable bottom */
     padding: 0 8px;
 
     text-align: center;
@@ -917,10 +881,8 @@ a.book-item:hover {
 }
 
 /* =========================
-   Chapter Chips (numbers + arrows)
+   Chapter Chips
 ========================= */
-
-/* Base chip */
 .chapter-chip {
     font-family: "MontserratLocal", var(--font-ui);
     font-weight: 650;
@@ -940,7 +902,6 @@ a.book-item:hover {
     transition: transform 140ms ease, border-color 140ms ease, background 140ms ease, box-shadow 140ms ease;
 }
 
-/* Hover (numbers + arrows) */
 .chapter-chip:hover {
     transform: translateY(-1px);
     border-color: rgba(30, 227, 207, 0.30);
@@ -948,14 +909,12 @@ a.book-item:hover {
     filter: drop-shadow(0 0 14px rgba(255, 208, 120, 0.25));
 }
 
-/* Active chapter */
 .chapter-chip.is-active {
     border-color: rgba(30, 227, 207, 0.42);
     box-shadow: 0 0 0 6px rgba(30, 227, 207, 0.06);
     background: radial-gradient(circle at 30% 30%, rgba(30, 227, 207, 0.16), transparent 60%);
 }
 
-/* Disabled chips (works for arrows too) */
 .chapter-chip.is-disabled {
     opacity: 0.30;
     cursor: not-allowed;
@@ -967,12 +926,9 @@ a.book-item:hover {
     box-shadow: none;
 }
 
-/* =========================
-   Arrow Chips (STRONG difference)
-========================= */
+/* Arrow chips */
 .chapter-chip[data-action="prev"],
 .chapter-chip[data-action="next"] {
-    /* More "button" looking */
     min-width: 48px;
     height: 38px;
     padding: 0 14px;
@@ -1000,7 +956,6 @@ a.book-item:hover {
     transform: translateY(0);
 }
 
-/* Arrow hover (strong glow) */
 .chapter-chip[data-action="prev"]:hover,
 .chapter-chip[data-action="next"]:hover {
     transform: translateY(-2px);
@@ -1019,20 +974,17 @@ a.book-item:hover {
         0 0 18px rgba(42, 167, 255, 0.18);
 }
 
-/* Arrow click feel */
 .chapter-chip[data-action="prev"]:active,
 .chapter-chip[data-action="next"]:active {
     transform: translateY(0) scale(0.98);
     filter: brightness(0.95);
 }
 
-/* Keyboard focus (accessible) */
 .chapter-chip:focus-visible {
     outline: none;
     box-shadow: 0 0 0 3px rgba(80, 160, 255, 0.18);
 }
 
-/* Smaller arrows on mobile */
 @media (max-width: 720px) {
 
     .chapter-chip[data-action="prev"],
@@ -1042,6 +994,7 @@ a.book-item:hover {
     }
 }
 
+/* Reader box */
 .page-book .reader {
     width: 100%;
     max-width: var(--book-content-width);
@@ -1055,6 +1008,7 @@ a.book-item:hover {
     box-shadow: var(--shadow);
 }
 
+/* Chapter content */
 .chapter {
     padding: 26px 12px;
 }
@@ -1120,8 +1074,6 @@ a.book-item:hover {
     font-size: clamp(28px, 4.2vw, 44px);
     letter-spacing: 0.02em;
     color: rgba(79, 159, 179, 0.92);
-
-    /* Always render in caps */
     text-transform: uppercase;
 }
 
@@ -1138,33 +1090,20 @@ a.book-item:hover {
     hyphens: auto;
 }
 
-/* Paragraph indentation rules */
+/* Indent rules (kept as-is) */
 .chapter-text p {
     margin: 0;
     text-indent: 1.6em;
 }
 
-/* No indent for very first paragraph in chapter (works even if hr/img comes first) */
 .chapter-text>p:first-of-type {
     text-indent: 0;
 }
 
-/* Centered lines */
 .chapter-text p.center,
 .chapter-text p[class^="center"] {
     text-align: center;
     text-indent: 0;
-}
-
-.the-end-wrap {
-    text-align: center;
-}
-
-.the-end {
-    text-indent: 0 !important;
-    /* ✅ cancel chapter paragraph indentation */
-    text-align: center;
-    /* (safe) */
 }
 
 /* No indent for the first paragraph AFTER each scene break */
@@ -1183,6 +1122,7 @@ a.book-item:hover {
     color: inherit;
 }
 
+/* The End */
 .the-end-wrap {
     margin-top: 32px;
     text-align: center;
@@ -1190,13 +1130,13 @@ a.book-item:hover {
 
 .the-end {
     margin: 0;
+    text-indent: 0 !important;
+    text-align: center;
 
-    /* same font as book titles */
     font-family: "CormorantUnicaseBold", "MontserratLocal", var(--font-ui);
     font-weight: 750;
     letter-spacing: 0.015em;
 
-    /* same gold fade */
     background: linear-gradient(180deg,
             #fff6c7 0%,
             #f6d77a 22%,
@@ -1208,14 +1148,11 @@ a.book-item:hover {
     color: transparent;
     -webkit-text-fill-color: transparent;
 
-    /* same glow/shadow vibe */
     text-shadow:
         0 10px 30px rgba(0, 0, 0, 0.55),
         0 0 18px rgba(246, 215, 122, 0.12);
 
     text-transform: none;
-
-    /* size (tweak if you want it bigger/smaller) */
     font-size: clamp(44px, 4vw, 64px);
     line-height: 1.05;
 }
@@ -1256,7 +1193,7 @@ a.book-item:hover {
     }
 }
 
-/* Scene images — no glow/filters; soft edge fade (square) */
+/* Scene images */
 .scene-img {
     display: block;
     width: min(520px, 92%);
@@ -1291,14 +1228,9 @@ a.book-item:hover {
     mask-size: 100% 100%;
 }
 
-/* =========================
-   Scene images: scroll reveal (book pages only)
-   - Collapsed by default ONLY when JS enables it
-   - Expands when .is-revealed is added
-========================= */
+/* Scene image reveal (JS-controlled) */
 html.js-scene-reveal .page-book .scene-img {
     max-height: 0;
-    /* collapsed = takes up no vertical space */
     margin: 0 auto;
     opacity: 0;
     transform: scale(0.98);
@@ -1316,14 +1248,12 @@ html.js-scene-reveal .page-book .scene-img {
 
 html.js-scene-reveal .page-book .scene-img.is-revealed {
     max-height: 900px;
-    /* must exceed max rendered height */
     margin: 22px auto;
 
     opacity: 1;
     transform: scale(1);
 }
 
-/* When collapsing offscreen, disable transitions so scroll compensation is exact */
 html.js-scene-reveal .page-book .scene-img.no-anim {
     transition: none !important;
 }
@@ -1530,7 +1460,7 @@ html.js-scene-reveal .page-book .scene-img.no-anim {
 }
 
 /* =========================
-   Reading Order Page
+   Timeline Page (supports both old + new class names)
 ========================= */
 .page-timeline .reading-wrap {
     width: 100%;
@@ -1542,7 +1472,9 @@ html.js-scene-reveal .page-book .scene-img.no-anim {
     margin-top: 18px;
 }
 
-.page-timeline .timeline {
+/* If your UL is .timeline OR .reading-order, both will work */
+.page-timeline .timeline,
+.page-timeline .reading-order {
     list-style: none;
     margin: 0;
     padding: 0;
@@ -1586,7 +1518,6 @@ html.js-scene-reveal .page-book .scene-img.no-anim {
     line-height: 1.85;
 }
 
-/* ✅ Links (subtle + clean) */
 .page-timeline .series-books a {
     color: inherit;
     text-decoration: none;
@@ -1600,7 +1531,6 @@ html.js-scene-reveal .page-book .scene-img.no-anim {
     opacity: 0.95;
 }
 
-/* In-between items: soft, lowkey indent + faded */
 .page-timeline .between-item {
     list-style: none;
     margin: 6px 0 0;
@@ -1626,7 +1556,6 @@ html.js-scene-reveal .page-book .scene-img.no-anim {
     font-size: 0.95em;
 }
 
-/* ✅ Between links even more lowkey */
 .page-timeline .between-item a {
     border-bottom-color: rgba(233, 242, 255, 0.18);
 }
@@ -1680,13 +1609,12 @@ html.js-scene-reveal .page-book .scene-img.no-anim {
 }
 
 /* =========================
-   Library (floating section labels)
+   Library
 ========================= */
 .page-library .book-list {
     margin-top: 0;
 }
 
-/* Series pages: add space above the grid */
 .page.page-library.page-series .book-list {
     margin-top: 22px;
 }
@@ -1727,7 +1655,6 @@ html.js-scene-reveal .page-book .scene-img.no-anim {
     font-weight: 800;
 
     border-radius: 9999px;
-    box-sizing: border-box;
 
     border: 1px solid rgba(233, 242, 255, 0.14);
     background: rgba(7, 20, 36, 0.55);
@@ -1774,8 +1701,6 @@ html.js-scene-reveal .page-book .scene-img.no-anim {
         justify-content: center;
     }
 
-    /* ✅ Dropdown stays under hamburger (right side),
-            but the links inside are centered */
     .nav-links {
         position: absolute;
         right: 16px;
@@ -1787,7 +1712,6 @@ html.js-scene-reveal .page-book .scene-img.no-anim {
         display: flex;
         flex-direction: column;
 
-        /* ✅ center the link items inside */
         align-items: center;
         text-align: center;
 
@@ -1817,7 +1741,6 @@ html.js-scene-reveal .page-book .scene-img.no-anim {
         width: 100%;
     }
 
-    /* ✅ links fill the dropdown width + centered text */
     .nav-links .nav-link {
         width: 100%;
         justify-content: center;
@@ -1843,68 +1766,24 @@ html.js-scene-reveal .page-book .scene-img.no-anim {
         min-width: 40px;
     }
 
-    /* Keep your existing mobile spacing rules */
-    .book-list {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 12px;
-    }
-
-    /* ✅ IMPORTANT: make the grid-cards behave like 2-per-row on mobile */
+    /* ✅ Mobile grid behavior (2-per-row) */
     .book-list--grid>.book-item {
         flex-basis: calc((100% - 12px) / 2);
-        /* 1 gap of 12px */
         max-width: none;
     }
 
-    .book-item {
-        display: block;
-        padding: 6px;
-        background: transparent;
-        border: 1px solid rgba(233, 242, 255, 0.1);
-        box-shadow: none;
-        border-radius: var(--radius2);
+    .book-list--grid {
+        gap: 12px;
+        /* match the calculation below */
     }
 
-    a.book-item:hover {
-        transform: translateY(-2px);
-        border-color: rgba(30, 227, 207, 0.3);
-        box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
-        background: transparent;
-    }
-
-    .book-cover {
-        width: 100%;
-        aspect-ratio: 2 / 3;
-        border-radius: var(--radius2);
-        box-shadow: 0 14px 40px rgba(0, 0, 0, 0.55);
-    }
-
-    .book-title {
-        margin: 0;
-        text-align: center;
-        font-size: 15px;
-        line-height: 1.25;
-    }
-
-    .book-summary {
-        display: none;
-    }
-
-    .book-info {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-    }
-
-    .book-meta {
-        display: inline-block;
-        margin: 10px auto 0;
-        box-shadow: 0 0 0 6px rgba(30, 227, 207, 0.05);
-    }
-
-    .book-item--disabled {
-        opacity: 0.55;
+    .book-list--grid>a.book-item {
+        flex: 0 0 calc((100% - 14px) / 2);
+        max-width: none;
+        width: auto;
+        /* cancels any width:100% overrides */
+        min-width: 0;
+        /* prevents overflow forcing single column */
     }
 
     .library-group {
@@ -1932,14 +1811,6 @@ html.js-scene-reveal .page-book .scene-img.no-anim {
 @media (max-width: 380px) {
     .book-list {
         gap: 10px;
-    }
-
-    .book-item {
-        padding: 5px;
-    }
-
-    .book-title {
-        font-size: 14px;
     }
 }
 

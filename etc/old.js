@@ -1,16 +1,12 @@
 /* =========================================================
-   main.js — cleaned + organized (UPDATED) 
-   ✅ Chapter slider window UI when chapters > 15
-   ✅ Mobile max = 5 numbers
-   ✅ Arrows always usable to shift window (even before selecting)
+   main.js — cleaned + organized
+   ✅ Chapter slider window UI when chapters > window size
+   ✅ Mobile max = 5 numbers | Desktop max = 9
+   ✅ Arrows shift window before selecting OR move chapter after selecting
    ✅ Clicking book title resets window back to 1
    ✅ To-top button works on ALL pages:
       - appears only if page is scrollable
       - appears only when user is near the bottom
-
-   ✅ FIXED:
-   - Desktop arrows appear when chapters > 9
-   - Mobile arrows appear when chapters > 5
 ========================================================= */
 
 /* =========================
@@ -146,13 +142,12 @@
 
     document.body.appendChild(gate);
 
-    const $ = (sel) => gate.querySelector(sel);
-    const input = $("#passkey-input");
-    const error = $("#passkey-error");
-    const card = $("#passkey-card");
-    const form = $("#passkey-form");
-    const clearBtn = $("#passkey-clear");
-    const enterBtn = $("#passkey-enter");
+    const input = gate.querySelector("#passkey-input");
+    const error = gate.querySelector("#passkey-error");
+    const card = gate.querySelector("#passkey-card");
+    const form = gate.querySelector("#passkey-form");
+    const clearBtn = gate.querySelector("#passkey-clear");
+    const enterBtn = gate.querySelector("#passkey-enter");
 
     const unlock = () => {
       gate.remove();
@@ -227,8 +222,7 @@
   const prefersReducedMotion = () =>
     window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  const scrollTop = (opts = {}) => {
-    const instant = !!opts.instant;
+  const scrollTop = ({ instant = false } = {}) => {
     const behavior = instant || prefersReducedMotion() ? "auto" : "smooth";
     window.scrollTo({ top: 0, behavior });
   };
@@ -291,12 +285,12 @@
     });
   }
 
-  /* =========================================================
-     ✅ To-top Button (UPDATED)
+  /* =========================
+     To-top Button
      - Works on ALL pages
      - Only appears if page is scrollable
      - Only appears when user is near the bottom
-  ========================================================= */
+  ========================= */
   let requestToTopVisibilityUpdate = () => { };
 
   function initToTopButton() {
@@ -358,8 +352,7 @@
     if (!imgs.length) return () => { };
 
     imgs.forEach((img) => {
-      img.classList.remove("is-revealed");
-      img.classList.remove("no-anim");
+      img.classList.remove("is-revealed", "no-anim");
       img.dataset.revealedOnce = "0";
     });
 
@@ -425,7 +418,6 @@
     if (!mount || !reader || !hint) return;
 
     let cleanupSceneReveal = () => { };
-
     reader.setAttribute("aria-label", "Book reader");
 
     const topNav = page.querySelector('[data-chapters="top"]');
@@ -449,30 +441,25 @@
         .filter((n) => Number.isFinite(n) && n > 0);
 
       const all = numsFromChips.concat(numsFromTemplates);
-      return all.length ? Math.max(...all) : null;
+      return all.length ? Math.max(...all) : 0;
     };
 
-    const TOTAL_CHAPTERS = getLastChapterNumber() || 0;
+    const TOTAL_CHAPTERS = getLastChapterNumber();
 
-    // ✅ Desktop shows 9 max, Mobile shows 5 max
+    const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+
     const getWindowSize = () => (window.innerWidth <= 720 ? 5 : 9);
-
-    // ✅ FIX: slider turns on based on CURRENT window size
     const useSlider = () => TOTAL_CHAPTERS > getWindowSize();
 
     let activeChapter = null;
     let windowStart = 1;
 
-    function setChapterStripsVisible(visible) {
+    const setChapterStripsVisible = (visible) => {
       if (topNav) topNav.hidden = !visible;
       if (bottomNav) bottomNav.hidden = !visible;
-    }
+    };
 
-    function clamp(n, min, max) {
-      return Math.max(min, Math.min(max, n));
-    }
-
-    function computeWindowStartForChapter(ch) {
+    const computeWindowStartForChapter = (ch) => {
       const size = getWindowSize();
       const centerSlot = Math.ceil(size / 2);
 
@@ -480,29 +467,23 @@
       const maxStart = Math.max(1, TOTAL_CHAPTERS - size + 1);
 
       return clamp(idealStart, 1, maxStart);
-    }
+    };
 
-    function makeChipLi({ label, href, chapter, ariaLabel }) {
+    const makeNumberChip = (chapter) => {
       const li = document.createElement("li");
       const a = document.createElement("a");
 
       a.className = "chapter-chip";
-      a.textContent = label;
-
-      if (ariaLabel) a.setAttribute("aria-label", ariaLabel);
-
-      if (chapter != null) {
-        a.dataset.chapter = String(chapter);
-        a.href = href || `#ch-${chapter}`;
-      } else {
-        a.href = "#";
-      }
+      a.dataset.chapter = String(chapter);
+      a.href = `#ch-${chapter}`;
+      a.textContent = String(chapter);
+      a.setAttribute("aria-label", `Chapter ${chapter}`);
 
       li.appendChild(a);
       return li;
-    }
+    };
 
-    function renderSliderStrip(navEl) {
+    const renderSliderStrip = (navEl) => {
       if (!navEl) return;
 
       const size = getWindowSize();
@@ -513,15 +494,12 @@
 
       navEl.innerHTML = "";
 
-      // wrapper row (arrows + list)
       const row = document.createElement("div");
       row.className = "chapter-strip-row";
 
-      // numbers list
       const ol = document.createElement("ol");
       ol.className = "chapter-strip-list";
 
-      // ✅ on mobile, allow scroll + hide scrollbar
       if (window.innerWidth <= 720) {
         ol.classList.add("is-slider");
       }
@@ -534,55 +512,42 @@
           ? activeChapter >= TOTAL_CHAPTERS
           : end >= TOTAL_CHAPTERS;
 
-      // prev arrow
       const prev = document.createElement("a");
       prev.className = "chapter-chip";
       prev.dataset.action = "prev";
       prev.href = "#";
       prev.textContent = "<";
       prev.setAttribute("aria-label", "Previous chapter");
-
       if (leftDisabled) {
         prev.classList.add("is-disabled");
         prev.setAttribute("aria-disabled", "true");
         prev.setAttribute("tabindex", "-1");
       }
 
-      // next arrow
       const next = document.createElement("a");
       next.className = "chapter-chip";
       next.dataset.action = "next";
       next.href = "#";
       next.textContent = ">";
       next.setAttribute("aria-label", "Next chapter");
-
       if (rightDisabled) {
         next.classList.add("is-disabled");
         next.setAttribute("aria-disabled", "true");
         next.setAttribute("tabindex", "-1");
       }
 
-      // chapter numbers
       for (let i = start; i <= end; i++) {
-        ol.appendChild(
-          makeChipLi({
-            label: String(i),
-            chapter: i,
-            href: `#ch-${i}`,
-            ariaLabel: `Chapter ${i}`,
-          })
-        );
+        ol.appendChild(makeNumberChip(i));
       }
 
       row.appendChild(prev);
       row.appendChild(ol);
       row.appendChild(next);
       navEl.appendChild(row);
-    }
+    };
 
-    function syncStrips() {
+    const syncStrips = () => {
       if (!useSlider()) {
-        // ✅ if slider isn't needed, just hide strips if chapters <= 1
         if (TOTAL_CHAPTERS <= 1) setChapterStripsVisible(false);
         return;
       }
@@ -592,15 +557,17 @@
 
       const chips = Array.from(page.querySelectorAll(".chapter-chip[data-chapter]"));
       chips.forEach((a) => {
-        const active =
+        const isActive =
           activeChapter != null && a.dataset.chapter === String(activeChapter);
-        a.classList.toggle("is-active", active);
-        if (active) a.setAttribute("aria-current", "true");
+
+        a.classList.toggle("is-active", isActive);
+
+        if (isActive) a.setAttribute("aria-current", "true");
         else a.removeAttribute("aria-current");
       });
-    }
+    };
 
-    function upsertTheEnd(ch) {
+    const upsertTheEnd = (ch) => {
       mount.querySelectorAll(".the-end-wrap").forEach((el) => el.remove());
 
       const last = getLastChapterNumber();
@@ -616,15 +583,15 @@
       wrap.className = "the-end-wrap";
       wrap.innerHTML = `<p class="the-end" aria-label="The End">The End</p>`;
       target.appendChild(wrap);
-    }
+    };
 
-    function resetSliderWindow() {
+    const resetSliderWindow = () => {
       windowStart = 1;
       activeChapter = null;
       if (useSlider()) syncStrips();
-    }
+    };
 
-    function clearChapter() {
+    const clearChapter = () => {
       cleanupSceneReveal();
       cleanupSceneReveal = () => { };
 
@@ -633,10 +600,7 @@
 
       reader.hidden = true;
 
-      if (TOTAL_CHAPTERS === 1) {
-        setChapterStripsVisible(true);
-      }
-
+      if (TOTAL_CHAPTERS === 1) setChapterStripsVisible(true);
       if (bottomNav) bottomNav.hidden = true;
 
       hint.hidden = false;
@@ -644,9 +608,9 @@
 
       resetSliderWindow();
       requestToTopVisibilityUpdate();
-    }
+    };
 
-    function renderPlaceholder(ch) {
+    const renderPlaceholder = (ch) => {
       const section = document.createElement("section");
       section.className = "chapter";
       section.id = `ch-${ch}`;
@@ -664,9 +628,9 @@
         </div>
       `;
       return section;
-    }
+    };
 
-    function renderChapter(ch) {
+    const renderChapter = (ch) => {
       const key = String(ch);
       const tpl = templates.get(key);
 
@@ -688,8 +652,8 @@
 
       if (TOTAL_CHAPTERS === 1) {
         setChapterStripsVisible(false);
-      } else {
-        if (bottomNav) bottomNav.hidden = false;
+      } else if (bottomNav) {
+        bottomNav.hidden = false;
       }
 
       hint.hidden = true;
@@ -700,7 +664,7 @@
 
       scrollTop({ instant: true });
       requestToTopVisibilityUpdate();
-    }
+    };
 
     const titleLink = page.querySelector(".book-header a");
     if (titleLink) {
@@ -733,12 +697,12 @@
         e.preventDefault();
 
         if (Number.isFinite(activeChapter)) {
-          const next =
+          const nextCh =
             action === "prev"
               ? Math.max(1, activeChapter - 1)
               : Math.min(TOTAL_CHAPTERS, activeChapter + 1);
 
-          if (next !== activeChapter) renderChapter(next);
+          if (nextCh !== activeChapter) renderChapter(nextCh);
           return;
         }
 
@@ -774,12 +738,10 @@
     });
 
     window.addEventListener("resize", () => {
-      // ✅ slider can turn on/off when resizing now
       syncStrips();
       requestToTopVisibilityUpdate();
     });
 
-    // initial render
     if (useSlider()) {
       resetSliderWindow();
       syncStrips();
@@ -799,6 +761,7 @@
       const dir = String(img.dataset.coverDir || "").trim();
       const count = Number(img.dataset.coverCount || "0");
       const ext = String(img.dataset.coverExt || "png").trim();
+
       if (!dir || !Number.isFinite(count) || count < 1) return;
 
       const n = 1 + Math.floor(Math.random() * count);
@@ -827,7 +790,7 @@
   }
 
   /* =========================
-     ✅ LIBRARY: ALPHABETICAL SORT (OPT-IN ONLY)
+     LIBRARY: ALPHABETICAL SORT (OPT-IN)
      - Only sorts lists with: data-alpha-sort="true"
   ========================= */
   function initLibraryAlphaSort() {

@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="googlebot" content="noindex, nofollow" />
+    <title>Fake Skating | Story Board</title>
+
+    <script>
+        document.documentElement.classList.add("is-loading");
+    </script>
+
+    <link rel="stylesheet" href="../../../css/style.css" />
+    <script defer src="../../../js/main.js"></script>
+</head>
+
+<body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <div id="site-header"></div>
+
+    <!--
+      IMPORTANT:
+      These dataset values make the JS render:
+      - 1 prologue (key: "prologue" / hash: #prologue)
+      - 49 chapters  (keys: "1".."49" / hashes: #ch-1..#ch-49)
+      - 2 epilogues  (keys: "ep-1","ep-2" / hashes: #ep-1,#ep-2)
+    -->
+    <main id="main" class="page page-book" data-book-reader data-prologue="1" data-chapters="49" data-epilogues="2">
+        <header class="page-header book-header">
+            <h1>
+                <a href="./fake-skating.html" aria-label="Back to Fake Skating" title="Back to Fake Skating">
+                    Fake Skating
+                </a>
+            </h1>
+        </header>
+
+        <!-- TOP chapter selector (JS will populate this nav) -->
+        <nav class="chapter-strip" aria-label="Chapters" data-chapters="top"></nav>
+
+        <!-- Hint text (shown only when no section is open) -->
+        <p id="chapter-hint" class="chapter-hint">CLICK A CHAPTER NUMBER TO START READING</p>
+
+        <!-- Synopsis (shown only when no section is open) -->
+        <p id="book-synopsis" class="book-synopsis">
+            <em>Fake Skating</em> follows Dani as she returns to small-town Minnesota hoping to reconnect with her old best friend Alec—only to find he’s become a hockey-obsessed hometown star—and when a sudden twist pushes them into a pretend relationship, the lines between performance and real feelings start to blur in ways neither of them expected.
+        </p>
+
+        <!-- Reader is hidden until a section is chosen -->
+        <article class="reader" id="reader" aria-label="Book reader" hidden>
+            <div id="chapter-mount" aria-live="polite"></div>
+        </article>
+
+        <!-- Bottom selector (JS will populate; hidden until a section is opened by JS) -->
+        <nav class="chapter-strip chapter-strip--bottom" aria-label="Chapters (bottom)" data-chapters="bottom" hidden></nav>
+
+        <!-- =====================================================
+             TEMPLATES
+             NOTE:
+             - Prologue key: "prologue"  => section id="prologue"  => hash "#prologue"
+             - Chapters: "1".."49"       => section id="ch-1"...   => hash "#ch-1"...
+             - Epilogues: "ep-1","ep-2"  => section id="ep-1"...   => hash "#ep-1"...
+             - data-part markers kept for future CSS/JS targeting
+        ====================================================== -->
+
+        <!-- Prologue -->
+        <template data-chapter="prologue" id="tpl-prologue">
+            <section id="prologue" class="chapter chapter--prologue" data-chapter="prologue" data-part="prologue">
+                <header class="chapter-head">
+                    <div class="chapter-num">PROLOGUE</div>
+                    <h2 class="chapter-title">ALEC</h2>
+                </header>
+
+                <div class="chapter-text">
+                    <hr class="scene-break" />
+                    <p>
+                        Alec hears the news at dinner: Dani Collins—his once-best-friend, once-something-more—is moving to Southview after her parents’ divorce. He plays along for his family, but the second he can escape, he bolts with rage and disbelief buzzing under his skin.
+                    </p>
+                    <img class="scene-img" src="../../../assets/images/standalone/fake-skating/book/0-1.png" alt="Scene image" />
+                    <hr class="scene-break" />
+                    <p>
+                        He tears out in his battered car, blasting a Brazilian track he doesn’t even understand, using volume to keep his head from exploding. Without meaning to, he ends up on the snowy dirt road by the pond—pulled back toward the one place he hasn’t let himself think about in years.
+                    </p>
+                    <img class="scene-img" src="../../../assets/images/standalone/fake-skating/book/0-2.png" alt="Scene image" />
+                    <hr class="scene-break" />
+                    <p>
+                        Alec parks and walks through deep snow to the abandoned pond shed—“their spot”—half expecting it to be ruined. Inside, his phone flashlight reveals the stolen chairs and the broken roof skylight still open to the moon, and the memories hit like a punch.
+                    </p>
+                    <img class="scene-img" src="../../../assets/images/standalone/fake-skating/book/0-3.png" alt="Scene image" />
+                    <hr class="scene-break" />
+                    <p>
+                        The shed drags him back to the last summer they were together: Dani and her mom only came for one month each year, and that month was everything—bikes, fishing, wandering town, and endless talking like no one else existed. This time, though, they came for a funeral, and the entire trip collapsed in two days.
+                    </p>
+                    <img class="scene-img" src="../../../assets/images/standalone/fake-skating/book/0-4.png" alt="Scene image" />
+                    <hr class="scene-break" />
+                    <p>
+                        After the funeral, Dani’s grandpa Mick explodes at her strict military dad in front of everyone, blaming him for tearing the family apart and basically throwing them out. By that night, Dani knows she’s leaving in the morning, and all their traditions—like the bakery donut game—vanish with it.
+                    </p>
+                    <img class="scene-img" src="../../../assets/images/standalone/fake-skating/book/0-5.png" alt="Scene image" />
+                    <hr class="scene-break" />
+                    <p>
+                        Later in the shed, Dani admits she’s weirdly devastated about losing her month in Southview, and Alec tries to bully the sadness away with jokes because he can’t handle her crying. Under the teasing, the truth slips out: he’s not ready to lose her, and he’s more upset than he wants to admit.
+                    </p>
+                    <img class="scene-img" src="../../../assets/images/standalone/fake-skating/book/0-6.png" alt="Scene image" />
+                    <hr class="scene-break" />
+                    <p>
+                        Later in the shed, Dani admits she’s weirdly devastated about losing her month in Southview, and Alec tries to bully the sadness away with jokes because he can’t handle her crying. Under the teasing, the truth slips out: he’s not ready to lose her, and he’s more upset than he wants to admit.
+                    </p>
+                    <img class="scene-img" src="../../../assets/images/standalone/fake-skating/book/0-7.png" alt="Scene image" />
+                    <hr class="scene-break" />
+                    <p>
+                        Alec leans into the memory like it’s happening again, the shed’s familiar smell and their old closeness pulling him forward—until the rest of what happened after that night slams down like a door. Back in the present, he drives home burning with anger, realizing he still hates her for what she did afterward… and now she’s coming back into his life.
+                    </p>
+                    <img class="scene-img" src="../../../assets/images/standalone/fake-skating/book/0-8.png" alt="Scene image" />
+                    <hr class="scene-break" />
+                </div>
+            </section>
+        </template>
+
+        <!-- Chapter 1 -->
+        <template data-chapter="1" id="tpl-ch-1">
+            <section id="ch-1" class="chapter" data-chapter="1" data-part="chapter">
+                <header class="chapter-head">
+                    <div class="chapter-num">1</div>
+                    <h2 class="chapter-title"><small>February—Senior Year</small></br>DANI</h2>
+                </header>
+                <div class="chapter-text">
+                    <hr class="scene-break" />
+                    <p>
+                        Dani wakes up in the moving truck to a wall of snow and the crushing realization that Southview is real. Her mom tries to sell the move, but Dani’s stomach knots at the thought of facing Alec again after their long-distance connection mysteriously died.
+                    </p>
+                    <img class="scene-img" src="../../../assets/images/standalone/fake-skating/book/1-1.png" alt="Scene image" />
+                    <hr class="scene-break" />
+                    <p>
+                        They jump down into brutal wind and approach the big white house—Grandpa Mick’s—only to find it dark and empty. Dani watches her mom call him, and the “welcome” is a casual blow: he’s off helping a friend with a boat, leaving them to unload everything alone.
+                    </p>
+                    <img class="scene-img" src="../../../assets/images/standalone/fake-skating/book/1-2.png" alt="Scene image" />
+                    <hr class="scene-break" />
+                    <p>
+                        Inside, the downstairs feels like a frozen time capsule—except the cozy cookie smell is gone. Upstairs, French doors open to a completely rebuilt apartment: bright windows, modern wood floors, white shelves and fireplace, new bedrooms, a kitchenette, and even a private deck entrance.
+                    </p>
+                    <img class="scene-img" src="../../../assets/images/standalone/fake-skating/book/1-3.png" alt="Scene image" />
+                    <hr class="scene-break" />
+                    <p>
+                        They haul boxes for hours, and Dani’s surprise “welcome committee” appears: Benji—now insisting on “Ben”—the rich neighbor kid Alec used to roast. He’s suddenly helpful, annoyingly polished, and arrives in a luxury SUV, sliding his number into Dani’s phone like this is all very charming.
+                    </p>
+                    <img class="scene-img" src="../../../assets/images/standalone/fake-skating/book/1-4.png" alt="Scene image" />
+                    <hr class="scene-break" />
+                    <p>
+                        A horn blasts outside, and Grandpa Mick storms in with the energy of someone ready to fight a driveway war. He hugs Dani’s mom warmly, but when he finally looks at Dani, the big reunion crashes into the dumbest line imaginable: “You got tall.” Dani bails to the cold just to escape the humiliation.
+                    </p>
+                    <img class="scene-img" src="../../../assets/images/standalone/fake-skating/book/1-5.png" alt="Scene image" />
+                    <hr class="scene-break" />
+                    <p>
+                        By the time the truck is finally empty, Dani is wiped out and starving, ready to disappear into her new bedroom. Instead, her mom announces dinner plans—at the Barczewskis’—and Dani’s dread spikes so fast it’s almost physical.
+                    </p>
+                    <img class="scene-img" src="../../../assets/images/standalone/fake-skating/book/1-6.png" alt="Scene image" />
+                    <hr class="scene-break" />
+                    <p>
+                        Dani scrambles for excuses—she’s gross, she’s tired, she’s not “people-ready”—but her mom steamrolls her, and even Grandpa Mick briefly offers to stay behind with her before getting shut down. Seconds later, Dani’s in the back of Mick’s truck, trying to breathe through the panic of seeing Alec any minute now.
+                    </p>
+                    <img class="scene-img" src="../../../assets/images/standalone/fake-skating/book/1-7.png" alt="Scene image" />
+                    <hr class="scene-break" />
+                </div>
+            </section>
+        </template>
+
+        <!-- Chapter 2 -->
+        <template data-chapter="2" id="tpl-ch-2">
+            <section id="ch-2" class="chapter" data-chapter="2" data-part="chapter">
+                <header class="chapter-head">
+                    <div class="chapter-num">2</div>
+                    <h2 class="chapter-title">ALEC</h2>
+                </header>
+                <div class="chapter-text">
+                    <hr class="scene-break" />
+                    <p>
+                        Alec comes home from a quiet shift at his uncle’s hardware store, starving and aching, dreaming about food and a shower. His mom is in full dinner mode and casually drops the bomb: Dani, her mom Hannah, and Grandpa Mick are coming over tonight.
+                    </p>
+                    <img class="scene-img" src="../../../assets/images/standalone/fake-skating/book/2-1.png" alt="Scene image" />
+                    <hr class="scene-break" />
+                    <p>
+                        He tries to play it cool, but inside he’s spiraling—Dani in his house, with his family acting like she’s a beloved relative, feels like too much. The news also attracts his dad’s hockey-buddy fan club, who start circling the dinner like it’s a celebrity sighting because Mick Boche is a local legend.
+                    </p>
+                    <img class="scene-img" src="../../../assets/images/standalone/fake-skating/book/2-2.png" alt="Scene image" />
+                    <hr class="scene-break" />
+                    <p>
+                        Downstairs, the twins are hypnotized by a cartoon, and Alec’s dad moves stiffly with his cane while the guys watch sports and toss Alec compliments about his last game. Alec lies about how bad his shoulder is and forces himself to act normal as the countdown to “the Boches” begins.
+                    </p>
+                    <img class="scene-img" src="../../../assets/images/standalone/fake-skating/book/2-3.png" alt="Scene image" />
+                    <hr class="scene-break" />
+                    <p>
+                        Up in the bathroom, Alec tries to reset—until his music betrays him with a song that drags his thoughts straight back to Dani. He snaps it off, but the pain spikes when he lifts his shirt, a sharp reminder that his body is starting to fail him in stupid, everyday ways.
+                    </p>
+                    <img class="scene-img" src="../../../assets/images/standalone/fake-skating/book/2-4.png" alt="Scene image" />
+                    <hr class="scene-break" />
+                    <p>
+                        A text from Vinny invites him to a bonfire where “everyone” will be, and Alec’s immediate rule—avoid parties, stay clean—wavers. Under the hot spray, with his shoulder throbbing and Dani about to walk through his door, the idea of getting numb starts sounding dangerously appealing.
+                    </p>
+                    <img class="scene-img" src="../../../assets/images/standalone/fake-skating/book/2-5.png" alt="Scene image" />
+                    <hr class="scene-break" />
+                </div>
+            </section>
+        </template>
+
+        <!-- Chapter 3 -->
+        <template data-chapter="3" id="tpl-ch-3">
+            <section id="ch-3" class="chapter" data-chapter="3" data-part="chapter">
+                <header class="chapter-head">
+                    <div class="chapter-num">3</div>
+                    <h2 class="chapter-title">DANI</h2>
+                </header>
+                <div class="chapter-text">
+                    <hr class="scene-break" />
+                    <p><!-- Add chapter 3 summary here --></p>
+                    <hr class="scene-break" />
+                </div>
+            </section>
+        </template>
+
+        <!-- ...keep your existing chapter templates up to 49... -->
+
+        <!-- Epilogue 1 -->
+        <template data-chapter="ep-1" id="tpl-ep-1">
+            <section id="ep-1" class="chapter chapter--epilogue" data-chapter="ep-1" data-part="epilogue">
+                <header class="chapter-head">
+                    <div class="chapter-num">✧1</div>
+                    <h2 class="chapter-title">EPILOGUE 1</h2>
+                </header>
+
+                <div class="chapter-text">
+                    <hr class="scene-break" />
+                    <p><!-- Add epilogue 1 summary here --></p>
+                    <hr class="scene-break" />
+                </div>
+            </section>
+        </template>
+
+        <!-- Epilogue 2 -->
+        <template data-chapter="ep-2" id="tpl-ep-2">
+            <section id="ep-2" class="chapter chapter--epilogue" data-chapter="ep-2" data-part="epilogue">
+                <header class="chapter-head">
+                    <div class="chapter-num">✧2</div>
+                    <h2 class="chapter-title">EPILOGUE 2</h2>
+                </header>
+
+                <div class="chapter-text">
+                    <hr class="scene-break" />
+                    <p><!-- Add epilogue 2 summary here --></p>
+                    <hr class="scene-break" />
+                </div>
+            </section>
+        </template>
+
+        <div id="site-waves"></div>
+    </main>
+
+    <div id="site-to-top"></div>
+    <div id="site-footer"></div>
+</body>
+
+</html>
